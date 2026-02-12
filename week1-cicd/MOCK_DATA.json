@@ -1,0 +1,58 @@
+[
+  {
+    "id": 1,
+    "firstName": "Asha",
+    "lastName": "Iyer",
+    "email": "asha.iyer@example.com",
+    "password": "pass1234"
+  },
+  {
+    "id": 2,
+    "firstName": "Noah",
+    "lastName": "Cole",
+    "email": "noah.cole@example.com",
+    "password": "pass2345"
+  },
+  {
+    "id": 3,
+    "firstName": "Mina",
+    "lastName": "Khan",
+    "email": "mina.khan@example.com",
+    "password": "pass3456"
+  },
+  {
+    "id": 4,
+    "firstName": "Luis Kumar",
+    "lastName": "Santos",
+    "email": "luis.santos@example.com",
+    "password": "pass4567"
+  },
+    {
+    "id": 5,
+    "firstName": "Noah Kumar",
+    "lastName": "Cole",
+    "email": "noah.cole@example.com",
+    "password": "pass2345"
+  },
+  {
+    "id": 6,
+    "firstName": "Mina",
+    "lastName": "Khan",
+    "email": "mina.khan@example.com",
+    "password": "pass3456"
+  },
+  {
+    "id": 7,
+    "firstName": "Luis Hamilton",
+    "lastName": "Santos",
+    "email": "luis.santos@example.com",
+    "password": "pass4567"
+  },
+  {
+    "id": 8,
+    "firstName": "John David",
+    "lastName": "Khan",
+    "email": "john.david.khan@example.com",
+    "password": "pass5678"
+  }
+]
