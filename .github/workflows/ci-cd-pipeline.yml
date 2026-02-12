@@ -183,6 +183,6 @@ jobs:
           aws ssm send-command \
             --document-name "AWS-RunShellScript" \
             --targets "Key=instanceids,Values=${{ env.EC2_INSTANCE_ID }}" \
-            --parameters 'commands=["set -e","CURRENT_IMAGE=$(docker inspect -f {{.Image}} ${{ env.CONTAINER_NAME }} 2>/dev/null || echo none)","docker pull ${{ env.IMAGE_NAME }}:latest","docker stop ${{ env.CONTAINER_NAME }} || true","docker rm ${{ env.CONTAINER_NAME }} || true","if docker run -d --name ${{ env.CONTAINER_NAME }} -p ${{ env.APP_PORT }}:5000 ${{ env.IMAGE_NAME }}:latest; then echo Deploy succeeded; else echo Deploy failed, rolling back; [ \"$CURRENT_IMAGE\" != none ] && docker run -d --name ${{ env.CONTAINER_NAME }} -p ${{ env.APP_PORT }}:5000 $CURRENT_IMAGE; exit 1; fi"]' \
+            --parameters 'commands=["set -e","CURRENT_IMAGE=$(docker inspect -f \'{{.Image}}\' ${{ env.CONTAINER_NAME }} 2>/dev/null || true)","docker pull ${{ env.IMAGE_NAME }}:latest","docker stop ${{ env.CONTAINER_NAME }} || true","docker rm ${{ env.CONTAINER_NAME }} || true","if docker run -d --name ${{ env.CONTAINER_NAME }} -p ${{ env.APP_PORT }}:5000 ${{ env.IMAGE_NAME }}:latest; then echo Deploy succeeded; else echo Deploy failed, rolling back; if [ -n \"$CURRENT_IMAGE\" ]; then docker run -d --name ${{ env.CONTAINER_NAME }} -p ${{ env.APP_PORT }}:5000 $CURRENT_IMAGE; fi; exit 1; fi"]' \
             --comment "Deploy node-ci-demo" \
             --region ${{ env.AWS_REGION }}
