@@ -1,4 +1,4 @@
-ls# Week 1 - CI/CD Foundations (Node + GraphQL)
+# Week 1 - CI/CD Foundations (Node + GraphQL)
 
 This week sets up a basic Node.js API server with both GraphQL and REST endpoints. The goal is to provide a simple app that can be built and deployed by CI/CD later.
 
@@ -111,3 +111,43 @@ mutation {
   }
 }
 ```
+
+## VIII. CI/CD Pipeline Overview
+
+GitHub Actions workflows must live in the repo root at [/.github/workflows](.github/workflows). Workflows placed inside `week1-cicd/` will not run.
+
+Workflows in this repo:
+- [/.github/workflows/ci-cd-pipeline.yml](.github/workflows/ci-cd-pipeline.yml)
+- [/.github/workflows/pr-validation.yml](.github/workflows/pr-validation.yml)
+- [/.github/workflows/dependency-scan.yml](.github/workflows/dependency-scan.yml)
+
+Stages in the main pipeline:
+- Build: installs dependencies, checks syntax, optional lint.
+- Test: optional tests if configured.
+- Security: npm audit, optional Snyk, CodeQL.
+- Docker: build and push to Docker Hub on `main`.
+- Deploy: OIDC + SSM Run Command to update EC2.
+
+### Required GitHub Secrets
+
+Set these in your repository settings:
+- `DOCKERHUB_USERNAME`
+- `DOCKERHUB_TOKEN`
+- `AWS_ROLE_ARN`
+- `EC2_INSTANCE_ID`
+
+Optional:
+- `SNYK_TOKEN`
+
+### EC2 prerequisites
+
+On the EC2 instance:
+- Docker installed and running.
+- SSM agent installed and instance role attached with `AmazonSSMManagedInstanceCore`.
+- Security group allows inbound TCP on port 5000.
+
+### Deploy flow
+
+1. Push to `main`.
+2. GitHub Actions builds and pushes the Docker image.
+3. The deploy job uses OIDC to call SSM and runs the container on EC2.

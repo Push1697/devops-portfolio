@@ -1,0 +1,43 @@
+name: Dependency Security Scan
+
+on:
+  schedule:
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: npm audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: week1-cicd/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: week1-cicd
+
+      - name: Run audit
+        run: npm audit --audit-level=moderate || true
+        working-directory: week1-cicd
+
+      - name: Save audit report
+        run: npm audit --json > audit-report.json || true
+        working-directory: week1-cicd
+
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-audit-report
+          path: week1-cicd/audit-report.json
