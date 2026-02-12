@@ -102,15 +102,6 @@ jobs:
         run: npm audit --audit-level=moderate || true
         working-directory: ${{ env.APP_DIR }}
 
-      - name: Run Snyk (optional)
-        if: secrets.SNYK_TOKEN != ''
-        uses: snyk/actions/node@master
-        continue-on-error: true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high
-
       - name: CodeQL init
         uses: github/codeql-action/init@v3
         with:
