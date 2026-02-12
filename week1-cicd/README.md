@@ -505,6 +505,86 @@ git credential reject
 git push origin main
 ```
 
+### Error 9: "SSM Deploy - syntax error near unexpected token"
+
+**What it looks like:**
+```
+/home/runner/work/_temp/828afed9-c529-49ff-916b-762e17f809e3.sh: line 4: syntax error near unexpected token `)'
+Error: Process completed with exit code 2.
+```
+
+**Why it happens:**
+- Improper quote escaping in bash command within the SSM JSON parameters
+- Using `\'{{.Image}}\'` (escaped single quotes) inside single-quoted JSON breaks shell parsing
+- Complex nested quoting of the JSON array confuses bash parser
+
+**Solution:**
+
+In `.github/workflows/ci-cd-pipeline.yml`, remove escaped quotes from `docker inspect` command:
+
+```yaml
+# ❌ WRONG - breaks shell syntax
+--parameters 'commands=["...","CURRENT_IMAGE=$(docker inspect -f \'{{.Image}}\' ${{ env.CONTAINER_NAME }} 2>/dev/null || true)","..."]'
+
+# ✅ CORRECT - uses unescaped {{.Image}} and simpler fallback
+--parameters 'commands=["...","CURRENT_IMAGE=$(docker inspect -f {{.Image}} ${{ env.CONTAINER_NAME }} 2>/dev/null || echo none)","..."]'
+```
+
+**Key changes:**
+- Remove `\'` and `\'` around `{{.Image}}`
+- Change fallback from `|| true` to `|| echo none` for cleaner logic
+- Simplify rollback: use `[ "$CURRENT_IMAGE" != none ]` instead of `[ -n "$CURRENT_IMAGE" ]`
+
+The corrected deploy step is in the workflow file at line 189.
+
+### Error 10: "InvalidInstanceId - Instances not in a valid state"
+
+**What it looks like:**
+```
+An error occurred (InvalidInstanceId) when calling the SendCommand operation: 
+Instances not in a valid state for account
+```
+
+**Why it happens:**
+- EC2 instance is stopped or not fully running
+- SSM agent on the instance hasn't registered yet (need to wait 2-3 minutes after start)
+- SSM agent service is stopped or crashed on the instance
+- Instance role is not properly attached
+
+**Solution:**
+
+Check instance status:
+```bash
+# 1. Is the instance running?
+aws ec2 describe-instances \
+  --instance-ids i-YOUR_INSTANCE_ID \
+  --region ap-south-1 \
+  --query 'Reservations[0].Instances[0].State.Name'
+# Should return: "running"
+
+# 2. Is SSM agent online?
+aws ssm describe-instance-information \
+  --region ap-south-1 \
+  --query 'InstanceInformationList[?InstanceIds==`i-YOUR_INSTANCE_ID`].PingStatus'
+# Should return: "Online"
+
+# 3. Is the instance role attached?
+aws ec2 describe-instances \
+  --instance-ids i-YOUR_INSTANCE_ID \
+  --region ap-south-1 \
+  --query 'Reservations[0].Instances[0].IamInstanceProfile.Arn'
+# Should show a role ARN (not null)
+```
+
+**If instance is stopped:** Start it and wait 2-3 minutes, then retry.
+
+**If SSM agent is offline:** SSH to the instance and restart it:
+```bash
+sudo systemctl status amazon-ssm-agent
+sudo systemctl restart amazon-ssm-agent
+sudo systemctl status amazon-ssm-agent  # Verify it's running
+```
+
 ---
 
 ## XI. Secrets Checklist
