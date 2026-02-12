@@ -15,7 +15,7 @@ permissions:
 env:
   NODE_VERSION: "20"
   APP_DIR: "week1-cicd"
-  IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/node-ci-demo
+  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/node-ci-demo
   CONTAINER_NAME: "node-ci-demo"
   APP_PORT: "5000"
   AWS_REGION: "ap-south-1"
