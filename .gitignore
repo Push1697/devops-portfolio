@@ -1,0 +1,12 @@
+# Ignore all files in the week1-cicd directory
+
+```ignore
+node_modules/
+week1-cicd/node_modules/
+dist/
+build/
+*.log
+.DS_Store
+Thumbs.db
+```
+config.bat
